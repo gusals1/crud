@@ -1,0 +1,97 @@
+function show all (response htmlfile) ( 콜백함수로 이해함)
+data:DummyDB.get() 이 문장은 좀 자세히 설명 들었으면 함.
+
+//홈 화면 출력
+app.get('/home', function (req, res) {
+    fs.readFile('home.ejs', 'utf8', function (error, data) {
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(ejs.render(data))
+    })
+})
+app.get('/', function (req, res) {
+    fs.readFile('home.ejs', 'utf8', function (error, data) {
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(ejs.render(data))
+    })
+})
+localhost로 들어갔을때나 localhost/home 주소로 들어갔을때는
+home.ejs파일을 읽어오게해서 home화면 이 출력되게 했다.
+
+//조회하는코드
+app.get('/list', function (req, res) {
+    showAll(res, 'list.ejs')
+
+    // fs.readFile('list.ejs', 'utf8', function (error, data) {
+    //     res.writeHead(200, { 'Content-Type': 'text/html' })
+    //     res.end(ejs.render(data))
+    // })
+})
+fs.readfile로 ejs 문서를 읽어왔더니 ejs파일에서 js부분에 data가 정의되지 않았다고 뜨면서 오류가 나서 여러가지를 시도해보다가
+showAll함수가 콜백함수처럼 response해주면서 htmlfile로 반환해서 읽어와주고 ejs.render로 dummydb.get()에 데이터를 반환해주는 기능을 하는거를 확인해보고 showAll(res,list.ejs)를 넣어주었더니 dummy get에서 data를 받아와 조회화면에 내가 insert한 자료들이 조회가 됐다.
+
+//데이터 추가하는 코드. get post
+app.get('/insert', function (req, res) {
+    showAll(res, 'insert.ejs')
+})
+insert도 fs.readfile로 읽어오다가 실패해서 insert의 post요청과
+list의 get요청을 해결하고 나니까 list 화면에 추가한 데이터가 나오는것을 보고 get('/insert') 부분도 list처럼 showAll을 추가해주니까
+화면에 ejs파일이 다 나타났음.
+
+app.post('/insert', function (req, res) {
+    let value = {
+        id: 0,
+        name: req.body.name,
+        region: req.body.region,
+    }
+
+    DummyDB.insert(value)
+    res.writeHead(302, {
+        Location: '/insert',
+    })
+    res.end()
+})
+데이터를 post요청으로 보내고 console log로 찍어보니까 log에 입력한 데이터는 들어갔는데 반응이 없어서 dummy db랑 연관시켜서 해야되는건가 생각이 들어서 일단 입력한 데이터를 분석해서 dummydb.insert에 보내주기 위해 데이터를 body parse해서 보내는데
+id가 인식이 안되가지고 오류가 났다 그래서 id에 기본값으로 0을 줘서 하나로 묶어 value로 선언해주고 dummydb(value)로  db.insert에 데이터를 보내주고나서 list를 해결하니까 화면에 입력한 데이터가 나타났습니다.
+
+//삭제화면
+app.post('/del', function (req, res) {
+    var num = req.body.num
+
+    DummyDB.remove(num)
+    res.writeHead(302, {
+        Location: '/del',
+    })
+    res.end()
+})
+del요청은 번호만 입력해서 삭제하는 부분이라 번호를 입력하는곳에서 받는 num를 var num으로 정의하고  db.remove(num)으로 보내니
+그 안에 데이터를 지우는 함수가 데이터를 지워준다.
+
+데이터 변경
+app.post('/edit', function (req, res) {
+    const newName = req.body.name
+    const id = req.body.num
+    const newRegion = req.body.region
+
+    console.log(newName,id,newRegion)
+    DummyDB.edit(id, newName, newRegion)
+    res.redirect('/edit')
+
+데이터를 바꾸는데 번호를 기준으로 바꾸는거 같아서 id는 그래도 받았고 name과 region을 둘다 바꿀수 있도록 /edit화면에서는 새로운 데이터를 입력받아 newname과 newregion으로 저장받아서 editdb에 보내줬다.
+
+  DummyDB.edit = function (num, newName, newRegion) {
+        if (num) {
+            for (var i in storage)
+                if (storage[i].id == num) {
+                    storage[i].name = newName
+                    storage[i].region = newRegion
+                    return storage[i]
+                }
+            return ''
+        } else {
+            return storage
+        }
+    }
+db.edit는 자료 설명에 따로 나와있지 않아서 새로 작성했는데
+post요청으로 num, newname, newregion을 받아와서
+num이 있는지 검사하고 for문으로 들어가 storage에 요소를 하나씩 검사해 입력한 번호에 id가 있는 배열이 있으면 그 안에 name과 region을 newname과 newregion으로 바꿔주고 그 배열을 반환해주니까 
+화면에는 데이터가 변경되어 나타났다.

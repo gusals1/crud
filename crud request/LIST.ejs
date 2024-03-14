@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset ="UTF-8">
+    <meta name ="viewport" content="width=device-width, initial-scale=1">
+    <link rel ="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>list</title>
+  </head>
+  <body>
+  <div class="w3-top">
+    <div class ="w3-var w3-dark-grey">
+      <a href="/home" class="w3-bar-item-w3-button">홈</a>
+      <a href="/insert" class="w3-bar-item-w3-button">추가</a>
+      <a href="/edit" class="w3-bar-item-w3-button">수정</a>
+      <a href="/del" class="w3-bar-item-w3-button">삭제</a>
+      <a href="/list" class="w3-bar-item-w3-button">조회</a>
+      <a href="/find" class="w3-bar-item-w3-button">찾기</a>
+    </div>
+  </div>
+  <br><br>
+  <div class="w3-header w3-center">
+    <h2>회원 명단</h2>
+  </div>
+
+  <table class="w3-table-all">
+    <thread>
+      <tr class= "w3-red">
+        <th>번호</th>
+        <th>성명</th>
+        <th>거주지</th>
+      </thread>
+      <% data.forEach(function(item){ %>
+            <tr>
+              <td><%= item.id%></td>
+              <td><%= item.name%></td>
+              <td><%= item.region %></td>
+            </tr>
+            <% }) %>
+      </table>
+    </body>
+    </html>
